@@ -1,0 +1,55 @@
+services:
+  adminer:
+    image: adminer
+    container_name: adminer
+    restart: always
+    ports:
+      - "8086:8080"  # access via http://localhost:8086
+    networks:
+      - notes-net
+  notes-db:
+    image: postgres:16
+    container_name: notes-db
+    environment:
+      POSTGRES_USER: notes_user
+      POSTGRES_PASSWORD: notes_pass
+      POSTGRES_DB: notes_db
+
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    networks:
+      - notes-net
+  notes-service:
+    container_name: notes-service
+    build:
+      context: ./notes-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://notes-db:5432/notes_db
+      SPRING_DATASOURCE_USERNAME: notes_user
+      SPRING_DATASOURCE_PASSWORD: notes_pass
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SERVER_PORT: 8082
+    ports:
+      - "8082:8082"
+    depends_on:
+      - notes-db
+    networks:
+      - notes-net
+  gateway-service:
+    container_name: gateway-service
+    build:
+      context: ./gateway-service
+    environment:
+      NOTES_SERVICE_URL: http://notes-service:8082
+    networks:
+      - notes-net
+    ports:
+      - "8080:8080"  # Gateway exposed to host
+
+networks:
+  notes-net:
+
+volumes:
+  pgdata:
