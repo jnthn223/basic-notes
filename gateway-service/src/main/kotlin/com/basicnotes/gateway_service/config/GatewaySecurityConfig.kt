@@ -1,0 +1,26 @@
+package com.basicnotes.gateway_service.config
+
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
+import org.springframework.security.config.annotation.web.builders.HttpSecurity
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
+import org.springframework.security.web.SecurityFilterChain
+
+@Configuration
+@EnableWebSecurity
+class GatewaySecurityConfig {
+
+    @Bean
+    fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
+        http
+            .csrf { it.disable() }
+            .authorizeHttpRequests {
+                it.requestMatchers("/public/**").permitAll()
+                    .anyRequest().authenticated()
+            }
+            .formLogin { it.loginPage("/auth/login") }   // <-- LOCAL PATH ONLY
+            .logout { it.logoutSuccessUrl("/auth/logout") }
+
+        return http.build()
+    }
+}

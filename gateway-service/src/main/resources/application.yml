@@ -3,11 +3,30 @@ server:
 
 
 spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          my-client:
+            client-id: gateway-client
+            client-secret: secret
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            authorization-grant-type: authorization_code
+            scope: openid, profile, email
+        provider:
+          my-provider:
+            issuer-uri: ${AUTH_SERVICE_URL:http://localhost:4006}
   cloud:
     gateway:
       server:
         webflux:
           routes:
+            - id: auth-service
+              uri: ${AUTH_SERVICE_URL:http://localhost:4006}
+              predicates:
+                - Path=/auth/**
+              filters:
+                - StripPrefix=1
             - id: notes-service
               uri: ${NOTES_SERVICE_URL:http://localhost:8082}
               predicates:

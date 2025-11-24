@@ -47,6 +47,14 @@ services:
       - notes-net
     ports:
       - "8080:8080"  # Gateway exposed to host
+  auth-service:
+    container_name: auth-service
+    build:
+      context: ./auth-service
+    networks:
+      - notes-net
+    ports:
+      - "4000:4000"
 
 networks:
   notes-net:

@@ -23,6 +23,11 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.jetbrains.kotlin:kotlin-reflect'
+	// Spring Authorization Server (Reactive)
+	implementation("org.springframework.security:spring-security-oauth2-authorization-server")
+
+	// For generating JWK / RSA keys
+	implementation("com.nimbusds:nimbus-jose-jwt")
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.jetbrains.kotlin:kotlin-test-junit5'
 	testImplementation 'org.springframework.security:spring-security-test'
