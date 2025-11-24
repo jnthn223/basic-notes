@@ -3,19 +3,12 @@ server:
 
 
 spring:
-  security:
-    oauth2:
-      client:
-        registration:
-          my-client:
-            client-id: gateway-client
-            client-secret: secret
-            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
-            authorization-grant-type: authorization_code
-            scope: openid, profile, email
-        provider:
-          my-provider:
-            issuer-uri: ${AUTH_SERVICE_URL:http://localhost:4006}
+  spring:
+    security:
+      oauth2:
+        resourceserver:
+          jwt:
+            jwk-set-uri: ${AUTH_SERVICE_URL:http://auth-service:4006}/oauth2/jwks
   cloud:
     gateway:
       server:

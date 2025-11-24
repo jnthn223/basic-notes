@@ -1,26 +1,35 @@
 package com.basicnotes.gateway_service.config
 
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.security.config.annotation.web.builders.HttpSecurity
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
-import org.springframework.security.web.SecurityFilterChain
+import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity
+import org.springframework.security.config.web.server.ServerHttpSecurity
+import org.springframework.security.config.web.server.ServerHttpSecurity.AuthorizeExchangeSpec
+import org.springframework.security.config.web.server.ServerHttpSecurity.OAuth2ResourceServerSpec
+import org.springframework.security.web.server.SecurityWebFilterChain
+
 
 @Configuration
-@EnableWebSecurity
-class GatewaySecurityConfig {
-
+@EnableWebFluxSecurity
+class ReactiveResourceServerConfig {
+    @Value("\${GATEWAY_SERVER_URL:http://localhost:4006}")
+    private lateinit var authserverURL: String
     @Bean
-    fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
+    fun securityWebFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain {
         http
-            .csrf { it.disable() }
-            .authorizeHttpRequests {
-                it.requestMatchers("/public/**").permitAll()
-                    .anyRequest().authenticated()
+            .authorizeExchange { exchanges: AuthorizeExchangeSpec ->
+                exchanges
+                    .pathMatchers("/api/public/**").permitAll()
+                    .anyExchange().authenticated()
             }
-            .formLogin { it.loginPage("/auth/login") }   // <-- LOCAL PATH ONLY
-            .logout { it.logoutSuccessUrl("/auth/logout") }
-
+            .oauth2ResourceServer { oauth2: OAuth2ResourceServerSpec ->
+                oauth2
+                    .jwt { jwt: OAuth2ResourceServerSpec.JwtSpec ->
+                        jwt
+                            .jwkSetUri("${authserverURL}/oauth2/jwks")
+                    }
+            }
         return http.build()
     }
 }
