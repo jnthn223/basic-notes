@@ -7,5 +7,6 @@ import org.springframework.boot.runApplication
 class GatewayServiceApplication
 
 fun main(args: Array<String>) {
+	print("I have been updated")
 	runApplication<GatewayServiceApplication>(*args)
 }

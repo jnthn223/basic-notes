@@ -12,22 +12,24 @@ import org.springframework.security.web.server.SecurityWebFilterChain
 
 @Configuration
 @EnableWebFluxSecurity
-class ReactiveResourceServerConfig {
-    @Value("\${GATEWAY_SERVER_URL:http://localhost:4006}")
-    private lateinit var authserverURL: String
+class GatewaySecurityConfig {
+    @Value("\${AUTH_SERVER_URL:http://auth-server:4000}")
+    private lateinit var authServerURL: String
     @Bean
     fun securityWebFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain {
         http
             .authorizeExchange { exchanges: AuthorizeExchangeSpec ->
                 exchanges
-                    .pathMatchers("/api/public/**").permitAll()
+                    .pathMatchers(
+                        "/login/**"// <-- if you have /auth login paths
+                    ).permitAll()
                     .anyExchange().authenticated()
             }
             .oauth2ResourceServer { oauth2: OAuth2ResourceServerSpec ->
                 oauth2
                     .jwt { jwt: OAuth2ResourceServerSpec.JwtSpec ->
                         jwt
-                            .jwkSetUri("${authserverURL}/oauth2/jwks")
+                            .jwkSetUri("${authServerURL}/oauth2/jwks")
                     }
             }
         return http.build()

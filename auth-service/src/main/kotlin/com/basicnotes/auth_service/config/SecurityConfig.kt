@@ -31,6 +31,7 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher
+import org.springframework.web.filter.ForwardedHeaderFilter
 import java.security.KeyPair
 import java.security.KeyPairGenerator
 import java.security.interfaces.RSAPrivateKey
@@ -41,7 +42,7 @@ import java.util.*
 @EnableWebSecurity
 class SecurityConfig {
 
-    @Value("\${GATEWAY_SERVER_URL:http://localhost:8080}")
+    @Value("\${http://localhost:4007}")
     private lateinit var gatewayserverUrl: String
 
     // ================================
@@ -92,7 +93,7 @@ class SecurityConfig {
     fun userDetailsService(): UserDetailsService {
         val user = User.withDefaultPasswordEncoder()
             .username("user")
-            .password("password")
+            .password("pass")
             .roles("USER")
             .build()
 
@@ -110,8 +111,9 @@ class SecurityConfig {
             .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
             .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
             .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
-            .redirectUri("$gatewayserverUrl/login/oauth2/code/gateway-client")
-            .postLogoutRedirectUri(gatewayserverUrl)
+            .redirectUri("http://localhost:4007/login/oauth2/code/gateway-client")
+            .redirectUri("https://oauth.pstmn.io/v1/callback")
+            .postLogoutRedirectUri("http://localhost:4007")
             .scope(OidcScopes.OPENID)
             .scope(OidcScopes.PROFILE)
             .clientSettings(

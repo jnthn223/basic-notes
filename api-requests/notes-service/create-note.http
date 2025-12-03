@@ -1,8 +1,9 @@
 
-POST http://localhost:8082/notes
+POST http://localhost:8080/api/notes
 Content-Type: application/json
 
 {
   "title": "Test Note",
   "content": "This is a test note"
 }
+

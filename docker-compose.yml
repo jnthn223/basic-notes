@@ -37,24 +37,29 @@ services:
       - notes-db
     networks:
       - notes-net
+  auth-service:
+    container_name: auth-service
+    build:
+      context: ./auth-service
+    environment:
+      SERVER_PORT: 4000
+      GATEWAY_SERVICE_URL: http://gateway-service:8080
+    networks:
+      - notes-net
+    ports:
+      - "4000:4000"
   gateway-service:
     container_name: gateway-service
     build:
       context: ./gateway-service
     environment:
+      SERVER_PORT: 4007
       NOTES_SERVICE_URL: http://notes-service:8082
+      AUTH_SERVER_URL: http://auth-service:4000
     networks:
       - notes-net
     ports:
-      - "8080:8080"  # Gateway exposed to host
-  auth-service:
-    container_name: auth-service
-    build:
-      context: ./auth-service
-    networks:
-      - notes-net
-    ports:
-      - "4000:4000"
+      - "4007:4007"  # Gateway exposed to host
 
 networks:
   notes-net:

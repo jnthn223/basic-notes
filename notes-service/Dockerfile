@@ -1,20 +1,22 @@
-# Stage 1: build
 FROM gradle:9.2.0-jdk21 AS builder
-
 WORKDIR /app
 
-COPY . .
-RUN chmod +x ./gradlew
+# Copy Gradle files only (cache dependencies)
+COPY build.gradle settings.gradle ./
+COPY gradle ./gradle
 
-# Just run bootJar (no subproject prefix)
-RUN ./gradlew bootJar --no-daemon
+RUN gradle --no-daemon dependencies
 
-# Stage 2: runtime
+# Now copy the rest of the source code
+COPY src ./src
+
+# Build app
+RUN gradle bootJar --no-daemon
+
+# --------------------- Runtime image ---------------------
 FROM eclipse-temurin:21-jre
+
 WORKDIR /app
+COPY --from=builder /app/build/libs/*.jar app.jar
 
-# Copy the generated JAR (adjust the version to your build)
-COPY --from=builder /app/build/libs/notes-service-0.0.1-SNAPSHOT.jar app.jar
-
-EXPOSE 8081
 ENTRYPOINT ["java", "-jar", "app.jar"]
