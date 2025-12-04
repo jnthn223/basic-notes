@@ -15,7 +15,7 @@ interface NotesListProps {
 
 export default function NotesList({ notes, selectedNoteId, onSelectNote, onDeleteNote }: NotesListProps) {
   return (
-    <ScrollArea className="flex-1">
+    <ScrollArea className="h-full w-full rounded-md border">
       <div className="p-4 space-y-2">
         {notes.map((note) => (
           <div
