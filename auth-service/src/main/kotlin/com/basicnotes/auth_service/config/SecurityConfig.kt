@@ -57,9 +57,9 @@ class SecurityConfig {
             .securityMatcher(authorizationServerConfigurer.endpointsMatcher)
             .with(authorizationServerConfigurer) {
                 it.oidc(Customizer.withDefaults()) // Enable OIDC 1.0
-            }
-            .authorizeHttpRequests { auth ->
-                auth.anyRequest().authenticated()
+            }.authorizeHttpRequests {
+                it.requestMatchers("/login", "/login.html", "/css/**", "/js/**", "/assets/**").permitAll()
+                    .anyRequest().authenticated()
             }
             .exceptionHandling { exceptions ->
                 exceptions.defaultAuthenticationEntryPointFor(
@@ -76,12 +76,18 @@ class SecurityConfig {
     // ================================
     @Bean
     @Order(2)
-    fun defaultSecurityFilterChain(http: HttpSecurity): SecurityFilterChain {
+    fun appSecurityFilterChain(http: HttpSecurity): SecurityFilterChain {
         http
+            .csrf { it.disable() } // <--- required for custom login form
             .authorizeHttpRequests { auth ->
-                auth.anyRequest().authenticated()
+                auth
+                    .requestMatchers("/login", "/css/**", "/js/**", "/assets/**")
+                    .permitAll()
+                    .anyRequest().authenticated()
             }
-            .formLogin(Customizer.withDefaults())
+            .formLogin { login ->
+                login.loginPage("/login.html").permitAll()
+            }
 
         return http.build()
     }

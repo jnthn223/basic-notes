@@ -1,22 +1,27 @@
+# --------------------- Build stage ---------------------
 FROM gradle:9.2.0-jdk21 AS builder
 WORKDIR /app
 
-# Copy Gradle files only (cache dependencies)
-COPY build.gradle settings.gradle ./
+# Copy Gradle wrapper and Gradle config first for caching
+COPY gradlew ./
 COPY gradle ./gradle
+COPY build.gradle settings.gradle ./
 
-RUN gradle --no-daemon dependencies
-
-# Now copy the rest of the source code
+# Copy the source code
 COPY src ./src
 
-# Build app
-RUN gradle bootJar --no-daemon
+# Make the wrapper executable
+RUN chmod +x ./gradlew
 
-# --------------------- Runtime image ---------------------
+# Build the Spring Boot JAR
+RUN ./gradlew bootJar --no-daemon
+
+# --------------------- Runtime stage ---------------------
 FROM eclipse-temurin:21-jre
-
 WORKDIR /app
+
+# Copy the built jar from builder stage
 COPY --from=builder /app/build/libs/*.jar app.jar
 
+# Run the Spring Boot app
 ENTRYPOINT ["java", "-jar", "app.jar"]
